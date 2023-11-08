@@ -19,26 +19,28 @@ on:  # yamllint disable-line rule:truthy
       - 'utils/check-style/aspell-ignore/**'
       - 'tests/ci/docs_check.py'
       - '.github/workflows/docs_check.yml'
+  workflow_dispatch:
+
 jobs:
   CheckLabels:
-    runs-on: [self-hosted, style-checker]
+    runs-on: 
+      - nscloud-ubuntu-22.04-amd64-8x16-with-cache
+      - nscloud-git-mirror-5gb
     steps:
       - name: Check out repository code
-        uses: ClickHouse/checkout@v1
-        with:
-          clear-repository: true
+        uses: namespacelabs/nscloud-checkout-action@v0
       - name: Labels check
         run: |
           cd "$GITHUB_WORKSPACE/tests/ci"
           python3 run_check.py
   DockerHubPushAarch64:
     needs: CheckLabels
-    runs-on: [self-hosted, style-checker-aarch64]
+    runs-on:
+      - nscloud-ubuntu-22.04-arm64-8x16-with-cache
+      - nscloud-git-mirror-5gb
     steps:
       - name: Check out repository code
-        uses: ClickHouse/checkout@v1
-        with:
-          clear-repository: true
+        uses: namespacelabs/nscloud-checkout-action@v0
       - name: Images check
         run: |
           cd "$GITHUB_WORKSPACE/tests/ci"
@@ -50,12 +52,12 @@ jobs:
           path: ${{ runner.temp }}/docker_images_check/changed_images_aarch64.json
   DockerHubPushAmd64:
     needs: CheckLabels
-    runs-on: [self-hosted, style-checker]
+    runs-on: 
+      - nscloud-ubuntu-22.04-amd64-8x16-with-cache
+      - nscloud-git-mirror-5gb
     steps:
       - name: Check out repository code
-        uses: ClickHouse/checkout@v1
-        with:
-          clear-repository: true
+        uses: namespacelabs/nscloud-checkout-action@v0
       - name: Images check
         run: |
           cd "$GITHUB_WORKSPACE/tests/ci"
@@ -67,14 +69,14 @@ jobs:
           path: ${{ runner.temp }}/docker_images_check/changed_images_amd64.json
   DockerHubPush:
     needs: [DockerHubPushAmd64, DockerHubPushAarch64]
-    runs-on: [self-hosted, style-checker]
+    runs-on: 
+      - nscloud-ubuntu-22.04-amd64-8x16-with-cache
+      - nscloud-git-mirror-5gb
     steps:
       - name: Check out repository code
-        uses: ClickHouse/checkout@v1
+        uses: namespacelabs/nscloud-checkout-action@v0
         with:
-          clear-repository: true
           fetch-depth: 0  # to find ancestor merge commits necessary for finding proper docker tags
-          filter: tree:0
       - name: Download changed aarch64 images
         uses: actions/download-artifact@v3
         with:
@@ -96,7 +98,9 @@ jobs:
           path: ${{ runner.temp }}/changed_images.json
   StyleCheck:
     needs: DockerHubPush
-    runs-on: [self-hosted, style-checker]
+    runs-on: 
+      - nscloud-ubuntu-22.04-amd64-8x16-with-cache
+      - nscloud-git-mirror-5gb
     if: ${{ success() || failure() }}
     steps:
       - name: Set envs
@@ -115,7 +119,7 @@ jobs:
           name: changed_images
           path: ${{ env.TEMP_PATH }}
       - name: Check out repository code
-        uses: ClickHouse/checkout@v1
+        uses: namespacelabs/nscloud-checkout-action@v0
         with:
           clear-repository: true
       - name: Style Check
@@ -130,7 +134,9 @@ jobs:
           sudo rm -fr "$TEMP_PATH"
   DocsCheck:
     needs: DockerHubPush
-    runs-on: [self-hosted, func-tester-aarch64]
+    runs-on: 
+      - nscloud-ubuntu-22.04-amd64-8x16-with-cache
+      - nscloud-git-mirror-5gb
     steps:
       - name: Set envs
         run: |
@@ -144,9 +150,7 @@ jobs:
           name: changed_images
           path: ${{ env.TEMP_PATH }}
       - name: Check out repository code
-        uses: ClickHouse/checkout@v1
-        with:
-          clear-repository: true
+        uses: namespacelabs/nscloud-checkout-action@v0
       - name: Docs Check
         run: |
           cp -r "$GITHUB_WORKSPACE" "$TEMP_PATH"
@@ -163,12 +167,12 @@ jobs:
       - StyleCheck
       - DockerHubPush
       - DocsCheck
-    runs-on: [self-hosted, style-checker]
+    runs-on: 
+      - nscloud-ubuntu-22.04-amd64-8x16-with-cache
+      - nscloud-git-mirror-5gb
     steps:
       - name: Check out repository code
-        uses: ClickHouse/checkout@v1
-        with:
-          clear-repository: true
+        uses: namespacelabs/nscloud-checkout-action@v0
       - name: Finish label
         run: |
           cd "$GITHUB_WORKSPACE/tests/ci"
