@@ -31,7 +31,7 @@ jobs:
           mkdir -p "$TEMP_PATH"
           cp -r "$GITHUB_WORKSPACE" "$TEMP_PATH"
           cd "$REPO_COPY/tests/ci"
-          pip3 install boto3 PyGithub 
+          pip3 install boto3 PyGithub unidiff
           python3 jepsen_check.py keeper
       - name: Cleanup
         if: always()
