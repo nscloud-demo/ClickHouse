@@ -11,6 +11,7 @@ jobs:
         uses: ClickHouse/checkout@v1
         with:
           clear-repository: true
+          submodules: true
       
       - name: Build and push
         uses: docker/build-push-action@v6
