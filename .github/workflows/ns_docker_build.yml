@@ -1,0 +1,20 @@
+name: NamespaceDockerBuild
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  dockerbuild:
+    runs-on: [nscloud]
+    steps:
+      - name: Check out repository code
+        uses: ClickHouse/checkout@v1
+        with:
+          clear-repository: true
+      
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: false
+          tags: user/app:latest
+ 
